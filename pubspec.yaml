@@ -74,6 +74,9 @@ dependencies:
   # YouTube 플레이어
   youtube_player_flutter: ^9.0.3
 
+  # Bluetooth 통신 (HC-06)
+  flutter_bluetooth_serial: ^0.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

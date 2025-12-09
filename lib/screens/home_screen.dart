@@ -5,7 +5,11 @@ import '../services/calendar_service.dart';
 import '../services/data_analyzer.dart';
 import '../services/youtube_music_service.dart';
 import '../services/music_recommendation_service.dart';
+import '../services/bluetooth_service.dart';
+import '../services/rfid_music_mapper.dart';
 import '../screens/analysis_screen.dart';
+import '../screens/bluetooth_connect_screen.dart';
+import '../screens/rfid_manager_screen.dart';
 import '../models/screen_data.dart';
 import '../config/api_keys.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScreenDataService _screenDataService = ScreenDataService();
   final HealthDataService _healthDataService = HealthDataService();
   final CalendarService _calendarService = CalendarService();
+  final BluetoothService _bluetoothService = BluetoothService();
+  final RfidMusicMapper _rfidMapper = RfidMusicMapper();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -274,7 +280,69 @@ class _HomeScreenState extends State<HomeScreen> {
                         elevation: 2,
                       ),
                     ),
-              
+
+              const SizedBox(height: 24),
+
+              // RFID 관련 버튼들
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.nfc, color: Colors.purple),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'RFID 음악 태그',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _openBluetoothConnect,
+                              icon: Icon(
+                                _bluetoothService.isConnected
+                                    ? Icons.bluetooth_connected
+                                    : Icons.bluetooth,
+                                color: _bluetoothService.isConnected
+                                    ? Colors.blue
+                                    : null,
+                              ),
+                              label: Text(_bluetoothService.isConnected
+                                  ? 'BT 연결됨'
+                                  : 'BT 연결'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _openRfidManager,
+                              icon: const Icon(Icons.settings_input_antenna),
+                              label: const Text('RFID 관리'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 24),
 
               // 스크린타임 데이터 표시 (디버그용)
@@ -524,6 +592,40 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return '${minutes}분';
     }
+  }
+
+  Future<void> _openBluetoothConnect() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BluetoothConnectScreen(
+          bluetoothService: _bluetoothService,
+        ),
+      ),
+    );
+
+    // 연결 상태가 변경되었으면 화면 갱신
+    if (result == true && mounted) {
+      setState(() {});
+    }
+  }
+
+  void _openRfidManager() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RfidManagerScreen(
+          bluetoothService: _bluetoothService,
+          rfidMapper: _rfidMapper,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _bluetoothService.dispose();
+    super.dispose();
   }
 
   Widget _buildInfoItem(String text) {

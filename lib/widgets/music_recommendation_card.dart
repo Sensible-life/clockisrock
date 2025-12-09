@@ -6,10 +6,12 @@ import '../screens/youtube_player_screen.dart';
 /// 음악 추천 카드 위젯
 class MusicRecommendationCard extends StatelessWidget {
   final MusicRecommendation recommendation;
+  final VoidCallback? onRfidMapPressed;
 
   const MusicRecommendationCard({
     super.key,
     required this.recommendation,
+    this.onRfidMapPressed,
   });
 
   @override
@@ -166,6 +168,23 @@ class MusicRecommendationCard extends StatelessWidget {
                     fontSize: 11,
                     color: Colors.grey[500],
                     fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+
+              // RFID 매핑 버튼
+              if (onRfidMapPressed != null) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: onRfidMapPressed,
+                    icon: const Icon(Icons.nfc, size: 20),
+                    label: const Text('RFID 태그에 매핑'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
+                    ),
                   ),
                 ),
               ],
